@@ -14,7 +14,8 @@ Once a team names its safe or opens it, the menu shows that on the same computer
 
 - Students type their 5-digit vault code from their code sheet and press **Open**.
 - A wrong code shakes the safe and says how many digits are right (not which ones).
-  Add `?hint=off` to the link (or `&hint=off` after a team) to hide that count.
+  To hide that count on one computer, add `&hint=off` to the end of the address after the team
+  opens its safe (for example `...?group=3&hint=off`).
 - The right code swings the door open on the treasure and shows the final challenge.
 - An open safe stays open on that computer, even after a refresh.
 - To lock it again, click **Teacher: close this safe** at the bottom right, then click again to confirm.
