@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Safe Cracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap">
+<style>
+/* One group's safe, full screen on a student computer. Safe on the left, code pad on the right; stacks on narrow screens. */
+:root{
+  --room:#0e1d22; --room-2:#15282e; --steel:#5d7882; --steel-hi:#8fa9b1; --steel-lo:#2e434a;
+  --door:#476168; --brass:#e7b043; --gold:#ffd25c; --ink:#f2f5f3; --muted:#9db4b8;
+  --open:#5fe3a1; --nope:#ff8f7a;
+  --display:"Bungee","Arial Black",system-ui,sans-serif;
+  --body:"Lexend","Century Gothic","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(ellipse at 50% 0%,var(--room-2),var(--room) 70%);color:var(--ink);font-family:var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-bottom,0px));
+  display:flex;flex-direction:column;gap:2vh;overflow:hidden}
+button,input{font:inherit}
+button{cursor:pointer;border:0}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;flex-wrap:wrap}
+h1{margin:0;font-family:var(--display);font-weight:400;color:var(--brass);font-size:clamp(1.4rem,4.5vh,2.8rem);line-height:1}
+.name{background:transparent;border:0;border-bottom:2px dashed var(--steel-lo);color:var(--ink);font-family:var(--display);font-size:clamp(1rem,3.4vh,2rem);text-align:right;width:12ch;padding:0}
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:3vw;align-items:center}
+/* safe */
+.safe{width:min(84%,66vh);aspect-ratio:1/1;justify-self:end;position:relative;perspective:1400px}
+.body{position:absolute;inset:0;border-radius:9%;background:linear-gradient(145deg,var(--steel-hi),var(--steel) 40%,var(--steel-lo));box-shadow:0 2vh 4vh rgba(0,0,0,.55),inset 0 0 0 4px rgba(255,255,255,.12)}
+.cavity{position:absolute;inset:9%;border-radius:6%;overflow:hidden;background:#140c02;box-shadow:inset 0 0 5vh rgba(0,0,0,.9)}
+.glow{position:absolute;inset:-30%;background:repeating-conic-gradient(rgba(255,210,92,.5) 0 12deg,rgba(255,210,92,0) 12deg 45deg);opacity:0;transition:opacity 1s .5s}
+.loot{position:absolute;inset:0;width:100%;height:100%;opacity:0;transform:scale(.85) translateY(6%);transition:opacity .6s .45s,transform .9s .45s cubic-bezier(.2,1.5,.4,1)}
+.door{position:absolute;inset:4%;border-radius:8%;transform-origin:0% 50%;transition:transform 1.4s cubic-bezier(.55,.05,.3,1.15);
+  background:radial-gradient(circle at 50% 50%,transparent 0 23%,rgba(0,0,0,.25) 23.5% 24.5%,transparent 25%),linear-gradient(150deg,#6d8a93,var(--door) 45%,#2f474e);
+  box-shadow:inset 0 0 0 5px rgba(255,255,255,.14),inset 0 0 0 12px rgba(0,0,0,.18),0 0 0 2px #1d2f34}
+.door::before,.door::after{content:"";position:absolute;left:-3%;width:7%;height:14%;border-radius:4px;background:linear-gradient(90deg,#3a535a,#9fb8bf,#3a535a)}
+.door::before{top:16%}.door::after{bottom:16%}
+.dial{position:absolute;left:50%;top:50%;width:38%;height:38%;margin:-19% 0 0 -19%;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg,#d8e3e6 0 2deg,#9fb2b8 2deg 10deg),#c8d5d9;box-shadow:0 1vh 2vh rgba(0,0,0,.5),inset 0 0 0 6px #6f8990;transition:transform 1s cubic-bezier(.3,1.3,.5,1)}
+.dial::before{content:"";position:absolute;inset:26%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f4f7f8,#93a8ae 70%)}
+.dial::after{content:"";position:absolute;left:50%;top:3%;width:5%;height:16%;margin-left:-2.5%;background:var(--brass);border-radius:3px}
+.handle{position:absolute;right:9%;top:50%;width:7%;height:30%;margin-top:-15%;border-radius:999px;background:linear-gradient(90deg,#c8962b,var(--gold),#a7740d)}
+.plate{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);font-family:var(--display);font-size:clamp(.9rem,2.6vh,1.6rem);color:#1d2f34;background:linear-gradient(#e9c86a,#b88a24);padding:.2em .8em;border-radius:6px;white-space:nowrap}
+.open .door{transform:rotateY(-108deg)}
+.open .glow{opacity:1;animation:spin 18s linear infinite}
+.open .loot{opacity:1;transform:none}
+.shake .safe{animation:shake .35s 2}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2%)}75%{transform:translateX(2%)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(.6)}50%{opacity:1;transform:scale(1.15)}}
+.tw{transform-box:fill-box;transform-origin:center;animation:twinkle 1.6s ease-in-out infinite}
+/* code pad */
+.pad{display:flex;flex-direction:column;gap:2vh;align-items:center;min-width:0}
+.pad p{margin:0;text-align:center;font-size:clamp(1rem,2.6vh,1.5rem);color:var(--muted);max-width:28ch}
+.slots{display:flex;gap:1.2vw}
+.slot{width:clamp(44px,8vh,84px);height:clamp(56px,10vh,104px);border-radius:12px;background:var(--room);border:3px solid var(--steel);display:grid;place-items:center;font-family:var(--display);font-size:clamp(1.6rem,6vh,3.6rem);color:var(--gold);font-variant-numeric:tabular-nums}
+.slot.cur{border-color:var(--gold)}
+.keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.2vh;width:min(100%,46vh)}
+.keys button{background:linear-gradient(#2b444b,#1d3238);color:var(--ink);font-family:var(--display);font-size:clamp(1.2rem,4vh,2.4rem);border-radius:14px;padding:1.2vh 0;border:2px solid var(--steel-lo)}
+.keys button:active{transform:translateY(2px)}
+.keys .go{background:linear-gradient(#f1c25a,#c8902a);color:#2b1c00;border-color:#8a5c08}
+.keys .del{font-size:clamp(.9rem,2.6vh,1.4rem)}
+.msg{min-height:3.4vh;font-size:clamp(1rem,2.8vh,1.6rem);font-weight:700;text-align:center}
+.msg.no{color:var(--nope)}.msg.ok{color:var(--open)}
+.win{display:flex;flex-direction:column;gap:2vh;align-items:center;text-align:center}
+.win h2{margin:0;font-family:var(--display);font-weight:400;color:var(--gold);font-size:clamp(2rem,8vh,4.6rem);line-height:1;text-shadow:0 0 3vh rgba(255,210,92,.5)}
+.task{background:rgba(255,255,255,.06);border:2px solid var(--brass);border-radius:16px;padding:2vh 1.6vw;font-size:clamp(1rem,2.8vh,1.6rem);line-height:1.45;max-width:30ch}
+.task b{font-family:var(--display);font-weight:400;color:var(--brass);display:block;margin-bottom:.4em}
+footer{flex:none;display:flex;justify-content:flex-end}
+.teacher{background:none;color:var(--muted);font-size:.85rem;text-decoration:underline;opacity:.7}
+/* picker */
+.pick{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vh;text-align:center}
+.pick p{margin:0;color:var(--muted);font-size:clamp(1rem,2.6vh,1.4rem)}
+.grid6{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2vh 2vw;width:min(100%,900px)}
+.grid6 a{display:block;text-decoration:none;font-family:var(--display);color:#2b1c00;background:linear-gradient(#f1c25a,#c8902a);border-radius:16px;padding:3vh 0;font-size:clamp(1.2rem,4vh,2.4rem)}
+canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+@media (max-width:760px){body{overflow:auto;height:auto}main{grid-template-columns:1fr}.safe{width:min(100%,420px)}.grid6{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){.door,.loot,.glow,.dial{transition:none!important}.open .glow{animation:none}.tw{animation:none;opacity:.8}.shake .safe{animation:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="coin" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fff2b0"/><stop offset=".5" stop-color="#ffd25c"/><stop offset="1" stop-color="#b9780c"/></radialGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0a6"/><stop offset=".55" stop-color="#f2bd3c"/><stop offset="1" stop-color="#a86b08"/></linearGradient>
+    <linearGradient id="ruby" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9aa8"/><stop offset=".5" stop-color="#e0213f"/><stop offset="1" stop-color="#7a0617"/></linearGradient>
+    <linearGradient id="emerald" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a6ffd0"/><stop offset=".5" stop-color="#14b46a"/><stop offset="1" stop-color="#05502c"/></linearGradient>
+    <linearGradient id="sapph" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b5d4ff"/><stop offset=".5" stop-color="#2f6be8"/><stop offset="1" stop-color="#0d2a73"/></linearGradient>
+    <symbol id="treasure" viewBox="0 0 200 200">
+      <ellipse cx="100" cy="182" rx="92" ry="20" fill="#7a4a05" opacity=".7"/>
+      <g fill="url(#bar)" stroke="#8a5806" stroke-width="1.2"><path d="M30 165 l14 -18 h48 l14 18 z"/><path d="M96 165 l14 -18 h48 l14 18 z"/><path d="M62 147 l14 -18 h48 l14 18 z"/></g>
+      <g stroke="#8a5806" stroke-width="1">
+        <ellipse cx="34" cy="176" rx="16" ry="6" fill="url(#coin)"/><ellipse cx="38" cy="170" rx="16" ry="6" fill="url(#coin)"/><ellipse cx="34" cy="164" rx="16" ry="6" fill="url(#coin)"/>
+        <ellipse cx="168" cy="176" rx="16" ry="6" fill="url(#coin)"/><ellipse cx="164" cy="170" rx="16" ry="6" fill="url(#coin)"/><ellipse cx="168" cy="164" rx="16" ry="6" fill="url(#coin)"/><ellipse cx="165" cy="158" rx="16" ry="6" fill="url(#coin)"/>
+        <ellipse cx="100" cy="180" rx="22" ry="7" fill="url(#coin)"/><ellipse cx="72" cy="182" rx="14" ry="5" fill="url(#coin)"/><ellipse cx="130" cy="182" rx="14" ry="5" fill="url(#coin)"/>
+      </g>
+      <g transform="translate(64 66)">
+        <path d="M4 58 L0 14 L20 34 L36 0 L52 34 L72 14 L68 58 Z" fill="url(#bar)" stroke="#8a5806" stroke-width="1.5"/>
+        <rect x="2" y="54" width="68" height="12" rx="3" fill="url(#bar)" stroke="#8a5806" stroke-width="1.5"/>
+        <circle cx="0" cy="12" r="4.5" fill="url(#ruby)"/><circle cx="36" cy="-2" r="5" fill="url(#sapph)"/><circle cx="72" cy="12" r="4.5" fill="url(#emerald)"/>
+        <path d="M30 42 l6 -9 l6 9 l-6 9 z" fill="url(#ruby)"/><circle cx="16" cy="60" r="3.5" fill="url(#emerald)"/><circle cx="36" cy="60" r="3.5" fill="url(#sapph)"/><circle cx="56" cy="60" r="3.5" fill="url(#emerald)"/>
+      </g>
+      <path d="M22 138 l10 -12 h16 l10 12 l-18 20 z" fill="url(#emerald)" stroke="#033" stroke-width="1"/>
+      <path d="M144 132 l9 -11 h14 l9 11 l-16 18 z" fill="url(#ruby)" stroke="#400" stroke-width="1"/>
+      <path d="M118 112 l7 -9 h11 l7 9 l-12 14 z" fill="url(#sapph)" stroke="#012" stroke-width="1"/>
+      <path d="M50 112 l6 -8 h10 l6 8 l-11 12 z" fill="url(#ruby)" stroke="#400" stroke-width="1"/>
+      <g fill="#fbf6ea" stroke="#c9bfa6" stroke-width=".6"><circle cx="40" cy="150" r="3"/><circle cx="47" cy="153" r="3"/><circle cx="54" cy="155" r="3"/><circle cx="61" cy="156" r="3"/><circle cx="140" cy="152" r="3"/><circle cx="147" cy="150" r="3"/><circle cx="154" cy="147" r="3"/></g>
+      <g fill="#fffbe6">
+        <path class="tw" d="M100 40 l3 9 l9 3 l-9 3 l-3 9 l-3 -9 l-9 -3 l9 -3 z"/>
+        <path class="tw" style="animation-delay:.5s" d="M30 80 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2 z"/>
+        <path class="tw" style="animation-delay:.9s" d="M170 70 l2.5 7 l7 2.5 l-7 2.5 l-2.5 7 l-2.5 -7 l-7 -2.5 l7 -2.5 z"/>
+        <path class="tw" style="animation-delay:1.2s" d="M150 115 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 z"/>
+        <path class="tw" style="animation-delay:.3s" d="M60 130 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 z"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- Picker: shown when the link has no ?group= -->
+<section class="pick" id="picker" hidden>
+  <h1>Safe Cracker</h1>
+  <p>Pick your group's safe.</p>
+  <nav class="grid6" aria-label="Choose a safe">
+    <a href="?group=1">Safe 1</a><a href="?group=2">Safe 2</a><a href="?group=3">Safe 3</a>
+    <a href="?group=4">Safe 4</a><a href="?group=5">Safe 5</a><a href="?group=6">Safe 6</a>
+  </nav>
+</section>
+
+<!-- One group's safe -->
+<header id="top" hidden>
+  <h1>Safe Cracker</h1>
+  <input class="name" id="name" aria-label="Group name" autocomplete="off">
+</header>
+<main id="game" hidden>
+  <div class="safe" id="safe">
+    <div class="body"></div>
+    <div class="cavity"><div class="glow"></div><svg class="loot" viewBox="0 0 200 200" role="img" aria-label="Gold bars, coins, jewels and a crown"><use href="#treasure"/></svg></div>
+    <div class="door"><div class="dial" id="dial"></div><div class="handle"></div><div class="plate" id="plate">SAFE</div></div>
+  </div>
+  <div class="pad" id="pad">
+    <p>Type your 5-digit vault code from your code sheet.</p>
+    <div class="slots" id="slots" aria-live="polite"></div>
+    <div class="keys" id="keys">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button class="del" data-k="del" aria-label="Delete">Delete</button><button data-k="0">0</button><button class="go" data-k="go">Open</button>
+    </div>
+    <div class="msg" id="msg" role="status"></div>
+  </div>
+  <div class="win" id="win" hidden>
+    <h2>Vault open!</h2>
+    <div class="task"><b>Final challenge</b>Write a two-step story that matches 45 + 20 − ? = 38. Trade with another group. Solve their story. Does it match the equation?</div>
+    <p style="margin:0;color:var(--muted);font-size:clamp(.9rem,2.4vh,1.3rem)">Show your teacher your open safe.</p>
+  </div>
+</main>
+<footer id="foot" hidden><button class="teacher" id="reset">Teacher: close this safe</button></footer>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<script>
+/* The vault code is not written in this file. Each digit is checked against a short fingerprint,
+   so students can't read the answer from the page source. Code: see README. */
+const DIGIT_PRINTS=["dbafb7cff2ae62d8","2b48787270102636","e843927dc8f72aa0","61d4f2c9092c9919","236dc5ea5bf52dc9"];
+const LEN=DIGIT_PRINTS.length;
+const params=new URLSearchParams(location.search);
+const rawGroup=parseInt(params.get("group")||"",10);
+const group=(rawGroup>=1&&rawGroup<=6)?rawGroup:0;
+const showHint=params.get("hint")!=="off";
+const KEY="safecracker-group-"+group;
+const $=s=>document.querySelector(s);
+const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+let S={open:false,name:"Group "+group}, typed="", spin=0, busy=false;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||"null");if(d)S=Object.assign(S,d)}catch(e){}}
+
+async function print(s){
+  if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+    return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("").slice(0,16);}
+  return "";
+}
+async function countRight(code){let n=0;for(let i=0;i<LEN;i++){if(await print(`vault-${i}-${code[i]}`)===DIGIT_PRINTS[i])n++;}return n;}
+
+function drawSlots(){$("#slots").innerHTML=Array.from({length:LEN},(_,i)=>`<div class="slot ${i===typed.length?"cur":""}" aria-label="Digit ${i+1}">${typed[i]??""}</div>`).join("");}
+function press(k){
+  if(S.open||busy)return;
+  if(k==="del"){typed=typed.slice(0,-1);}
+  else if(k==="go"){submit();return;}
+  else if(/^\d$/.test(k)&&typed.length<LEN){typed+=k;}
+  $("#msg").textContent="";drawSlots();
+}
+async function submit(){
+  const m=$("#msg");
+  if(typed.length<LEN){m.className="msg no";m.textContent=`Type all ${LEN} digits first.`;return;}
+  busy=true;const right=await countRight(typed);busy=false;
+  if(right===LEN){
+    S.open=true;save();spin+=720;$("#dial").style.transform=`rotate(${spin}deg)`;
+    setTimeout(openUp,reduce?0:700);
+  }else{
+    spin+=90;$("#dial").style.transform=`rotate(${spin}deg)`;
+    m.className="msg no";m.textContent=showHint?`Not yet. ${right} of ${LEN} digits are right.`:"Not yet. Check your locks.";
+    document.body.classList.remove("shake");void document.body.offsetWidth;document.body.classList.add("shake");
+    typed="";drawSlots();
+  }
+}
+function openUp(animate=true){
+  $("#game").classList.add("open");$("#pad").hidden=true;$("#win").hidden=false;
+  if(animate&&!reduce){const r=$("#safe").getBoundingClientRect();spawn((r.left+r.width/2)*devicePixelRatio,(r.top+r.height*.55)*devicePixelRatio,140);}
+}
+document.addEventListener("keydown",e=>{if(e.target.closest("input"))return;
+  if(/^\d$/.test(e.key))press(e.key);else if(e.key==="Backspace")press("del");else if(e.key==="Enter")press("go");});
+$("#keys").addEventListener("click",e=>{const b=e.target.closest("button");if(b)press(b.dataset.k);});
+
+/* coins and gems */
+const cv=$("#fx"),cx=cv.getContext("2d");let parts=[],raf=0;
+function size(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;}
+addEventListener("resize",size);size();
+function spawn(x,y,n){for(let k=0;k<n;k++){const a=-Math.PI/2+(Math.random()-.5)*2.4,sp=(7+Math.random()*11)*devicePixelRatio;
+  parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:(6+Math.random()*9)*devicePixelRatio,rot:Math.random()*6,vr:(Math.random()-.5)*.4,kind:Math.random()<.72?"coin":(Math.random()<.5?"spark":"gem"),hue:[350,150,220][k%3]});}
+  if(!raf)raf=requestAnimationFrame(step);}
+function step(){cx.clearRect(0,0,cv.width,cv.height);const g=.35*devicePixelRatio;parts=parts.filter(p=>p.y<cv.height+40);
+  for(const p of parts){p.vy+=g;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.vx*=.99;cx.save();cx.translate(p.x,p.y);cx.rotate(p.rot);
+    if(p.kind==="coin"){cx.scale(Math.abs(Math.cos(p.rot*2))*.85+.15,1);const gr=cx.createRadialGradient(-p.r*.3,-p.r*.3,1,0,0,p.r);gr.addColorStop(0,"#fff3b8");gr.addColorStop(.55,"#ffd25c");gr.addColorStop(1,"#b9780c");cx.fillStyle=gr;cx.beginPath();cx.arc(0,0,p.r,0,7);cx.fill();cx.strokeStyle="#8a5806";cx.lineWidth=1.5;cx.stroke();}
+    else if(p.kind==="gem"){cx.fillStyle=`hsl(${p.hue} 85% 55%)`;cx.beginPath();cx.moveTo(0,-p.r);cx.lineTo(p.r*.8,0);cx.lineTo(0,p.r);cx.lineTo(-p.r*.8,0);cx.closePath();cx.fill();}
+    else{cx.fillStyle="#fffbe6";cx.beginPath();for(let k=0;k<8;k++){const rr=k%2?p.r*.3:p.r;cx.lineTo(Math.cos(k*Math.PI/4)*rr,Math.sin(k*Math.PI/4)*rr);}cx.fill();}
+    cx.restore();}
+  raf=parts.length?requestAnimationFrame(step):0;}
+
+/* teacher reset (two taps) */
+let armed=false;
+$("#reset").onclick=e=>{if(!armed){armed=true;e.target.textContent="Tap again to close and lock this safe";setTimeout(()=>{armed=false;e.target.textContent="Teacher: close this safe"},3000);return;}
+  armed=false;S.open=false;save();location.reload();};
+
+if(!group){$("#picker").hidden=false;}
+else{
+  load();
+  ["#top","#game","#foot"].forEach(s=>$(s).hidden=false);
+  $("#plate").textContent="SAFE "+group;document.title="Safe "+group+" · Safe Cracker";
+  $("#name").value=S.name;$("#name").addEventListener("input",e=>{S.name=e.target.value;save();});
+  drawSlots();
+  if(S.open)openUp(false);
+}
+</script>
+</body>
+</html>
