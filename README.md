@@ -1,21 +1,20 @@
 # Safe Cracker
 
-A one-safe-per-group vault page for a Grade 2 story-problem review (Reveal Math Unit 4).
+A one-safe-per-team vault page for a Grade 2 story-problem review (Reveal Math Unit 4).
 
-## Links for each group's computer
+## One link for every computer
 
-Open the site with `?group=1` through `?group=6` at the end, for example:
+https://realmrteacherman.github.io/SafeCracker/
 
-- `https://realmrteacherman.github.io/SafeCracker/?group=1`
-- `https://realmrteacherman.github.io/SafeCracker/?group=6`
-
-The plain site address shows a page where students pick their safe.
+The link opens a "Click your team" menu with Team 1 to Team 6. Each team clicks its
+button to get its own safe. **Change team** (bottom left of a safe) goes back to the menu.
+Once a team names its safe or opens it, the menu shows that on the same computer.
 
 ## How it works
 
 - Students type their 5-digit vault code from their code sheet and press **Open**.
 - A wrong code shakes the safe and says how many digits are right (not which ones).
-  Add `&hint=off` to a link to hide that count.
+  Add `?hint=off` to the link (or `&hint=off` after a team) to hide that count.
 - The right code swings the door open on the treasure and shows the final challenge.
 - An open safe stays open on that computer, even after a refresh.
 - To lock it again, click **Teacher: close this safe** at the bottom right, then click again to confirm.
